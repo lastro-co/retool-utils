@@ -1,0 +1,70 @@
+{
+  "name": "@lastro-co/retool-utils",
+  "author": {
+    "name": "André Vandal",
+    "email": "me@andrewvandal.dev",
+    "url": "https://andrevandal.dev"
+  },
+  "private": false,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js"
+    }
+  },
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.es.js",
+  "typings": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "docs": "typedoc",
+    "preview": "vite preview",
+    "build": "tsc && vite build && typedoc",
+    "build:watch": "tsc && vite build --watch && typedoc",
+    "dev": "vite && typedoc",
+    "preinstall": "npx only-allow pnpm",
+    "prepare": "husky install",
+    "test:coverage": "vitest run --coverage",
+    "test:run": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint --ext .ts,.json --ignore-path .gitignore .",
+    "format:html": "prettier --ignore-path .gitignore '**/*.html' --write",
+    "lint-staged": "lint-staged"
+  },
+  "lint-staged": {
+    "*.ts": "lint --fix",
+    "*.html": "format:html"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.191",
+    "@types/node": "^18.11.18",
+    "@types/web": "^0.0.88",
+    "@typescript-eslint/eslint-plugin": "^5.48.2",
+    "@typescript-eslint/parser": "^5.48.2",
+    "@vitest/coverage-c8": "^0.27.2",
+    "c8": "^7.12.0",
+    "eslint": "^8.32.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.1.0",
+    "lodash": "4.17.12",
+    "moment": "2.24",
+    "numbro": "2.3.2",
+    "papaparse": "4.6.3",
+    "prettier": "^2.8.3",
+    "typedoc": "^0.23.24",
+    "typescript": "^4.9.3",
+    "uuid": "8.3.2",
+    "vite": "^4.0.0",
+    "vite-tsconfig-paths": "^4.0.3",
+    "vitest": "^0.27.2"
+  },
+  "dependencies": {
+    "consola": "^2.15.3"
+  }
+}
