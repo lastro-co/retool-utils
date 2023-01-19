@@ -6,7 +6,7 @@ const formatVatNumber = (string: string) => {
   }[s.length] || string
 }
 
-export {
+export default {
   formatVatNumber
 }
 

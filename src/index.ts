@@ -6,8 +6,10 @@ if (typeof window !== 'undefined') {
 }
 
 import validators from '~/validators'
+import formatters from '~/formatters'
 
 export default {
   validators,
+  formatters,
   consola
 }
