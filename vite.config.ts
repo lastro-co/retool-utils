@@ -18,7 +18,7 @@ const config = {
         entry: path.resolve(__dirname, 'src/index.ts'),
         fileName: 'index',
         formats: ['es', 'cjs', 'umd', 'iife'],
-        name: 'utils',
+        name: 'lastroUtils',
       },
       rollupOptions: {
         external: ['lodash', 'moment', 'numbro', 'papaparse'],
