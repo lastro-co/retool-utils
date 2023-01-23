@@ -7,9 +7,11 @@ if (typeof window !== 'undefined') {
 
 import validators from '~/validators'
 import formatters from '~/formatters'
+import helpers from '~/helpers'
 
 export default {
   validators,
   formatters,
-  consola
+  consola,
+  helpers
 }

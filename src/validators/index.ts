@@ -7,6 +7,13 @@ function validateInputVatNumberCustomRule (value: string){
   return (value && !isValid) ? 'CPF/CNPJ inválido' : ''
 }
 
+export {
+  validateVatNumber,
+  validateCNPJ,
+  validateCPF,
+  validateInputVatNumberCustomRule
+}
+
 export default {
   validateVatNumber,
   validateCNPJ,

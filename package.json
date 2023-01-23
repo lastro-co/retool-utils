@@ -31,12 +31,13 @@
     "test:coverage": "vitest run --coverage",
     "test:run": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint --ext .ts,.json --ignore-path .gitignore .",
+    "lint": "eslint --ext .ts --ignore-path .gitignore .",
+    "lint:fix": "eslint --ext .ts --ignore-path .gitignore . --fix",
     "format:html": "prettier --ignore-path .gitignore '**/*.html' --write",
     "lint-staged": "lint-staged"
   },
   "lint-staged": {
-    "*.ts": "lint --fix",
+    "*.ts": "eslint --ignore-path .gitignore --fix",
     "*.html": "format:html"
   },
   "devDependencies": {
