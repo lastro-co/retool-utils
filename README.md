@@ -10,8 +10,8 @@ This library is loaded in all Lastro Retool Applications and it has the responsi
 
 | Name	| Docs 	| Versions	| should be imported as	|
 | ---	| ---	| ---	| ---	|
-| lodash 	| https://lodash.com/docs/ 	| `4.17.4` 	| `_`  |
-| moment 	| https://momentjs.com/docs/ 	| `2.18.1` 	| `moment` |
-| uuid 	| https://github.com/kelektiv/node-uuid 	| Both `v1` and `v4`; use `uuid.v1()` or `uuid.v4()`	| `uuid` |
-| numbro 	| https://github.com/BenjaminVanRyseghem/numbro 	|  `2.1.0`	| `numbro` |
-| papaparse 	| https://www.papaparse.com/docs 	| `4.6.3`	| `papaparse` |
+| lodash 	| https://lodash.com/docs/ 	| `4.17.12` 	| `_`  |
+| moment 	| https://momentjs.com/docs/ 	| `2.24.0` 	| `moment` |
+| uuid 	| https://github.com/kelektiv/node-uuid  |  `8.3.2` | `uuid` |
+| numbro 	| https://github.com/BenjaminVanRyseghem/numbro 	|  `2.3.2`	| `numbro` |
+| papaparse 	| https://www.papaparse.com/docs 	| `4.6.3`	| `Papa` |
