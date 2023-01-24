@@ -24,10 +24,10 @@ const config = {
         external: ['lodash', 'moment', 'numbro', 'papaparse'],
         output: {
           globals: {
-            lodash: 'lodash',
+            lodash: '_',
             moment: 'moment',
             numbro: 'numbro',
-            papaparse: 'papaparse',
+            papaparse: 'Papa',
           },
         },
       },
