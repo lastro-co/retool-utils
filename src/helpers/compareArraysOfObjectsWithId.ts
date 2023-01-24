@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { v4 as uuidv4 } from 'uuid'
 
 enum Status {
   CREATED = 'create',
@@ -58,13 +59,6 @@ function compareArraysOfObjectsWithId(baseArray: Record<string, any>[], newArray
 export default compareArraysOfObjectsWithId
 
 if (import.meta.vitest) {
-  function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8)
-      return v.toString(16)
-    })
-  }
-
   type BaseAmount = {
     adjustable?: boolean
     adjustment?: number,

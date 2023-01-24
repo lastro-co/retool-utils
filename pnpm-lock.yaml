@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@types/lodash': ^4.14.191
   '@types/node': ^18.11.18
+  '@types/uuid': ^9.0.0
   '@types/web': ^0.0.88
   '@typescript-eslint/eslint-plugin': ^5.48.2
   '@typescript-eslint/parser': ^5.48.2
@@ -32,6 +33,7 @@ dependencies:
 devDependencies:
   '@types/lodash': 4.14.191
   '@types/node': 18.11.18
+  '@types/uuid': 9.0.0
   '@types/web': 0.0.88
   '@typescript-eslint/eslint-plugin': 5.48.2_caon6io6stgpr7lz2rtbhekxqy
   '@typescript-eslint/parser': 5.48.2_7uibuqfxkfaozanbtbziikiqje
@@ -365,6 +367,10 @@ packages:
 
   /@types/semver/7.3.13:
     resolution: {integrity: sha512-21cFJr9z3g5dW8B0CVI9g2O9beqaThGQ6ZFBqHfwhzLDKUxaqTIy3vnfah/UPkfOiF2pLq+tGz+W8RyCskuslw==}
+    dev: true
+
+  /@types/uuid/9.0.0:
+    resolution: {integrity: sha512-kr90f+ERiQtKWMz5rP32ltJ/BtULDI5RVO0uavn1HQUOwjx0R1h0rnDYNL0CepF1zL5bSY6FISAfd9tOdDhU5Q==}
     dev: true
 
   /@types/web/0.0.88:

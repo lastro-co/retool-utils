@@ -21,13 +21,14 @@ const config = {
         name: 'lastroUtils',
       },
       rollupOptions: {
-        external: ['lodash', 'moment', 'numbro', 'papaparse'],
+        external: ['lodash', 'moment', 'numbro', 'papaparse', 'uuid'],
         output: {
           globals: {
             lodash: '_',
             moment: 'moment',
             numbro: 'numbro',
             papaparse: 'Papa',
+            uuid: 'uuid',
           },
         },
       },
