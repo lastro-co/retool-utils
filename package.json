@@ -10,12 +10,12 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.es.js",
+      "import": "./dist/index.js",
       "require": "./dist/index.cjs.js"
     }
   },
-  "main": "./dist/index.umd.js",
-  "module": "./dist/index.es.js",
+  "main": "./dist/index.umd.cjs",
+  "module": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "files": [
     "dist"
@@ -23,7 +23,8 @@
   "scripts": {
     "docs": "typedoc",
     "preview": "vite preview",
-    "build": "tsc && vite build && typedoc",
+    "build": "tsc && vite build",
+    "prepublishOnly": "npm-dts generate --output ./dist/index.d.ts",
     "build:watch": "tsc && vite build --watch && typedoc",
     "dev": "vite && typedoc",
     "preinstall": "npx only-allow pnpm",
@@ -56,6 +57,7 @@
     "lint-staged": "^13.1.0",
     "lodash": "4.17.12",
     "moment": "2.24",
+    "npm-dts": "^1.3.12",
     "numbro": "2.3.2",
     "papaparse": "4.6.3",
     "prettier": "^2.8.3",
