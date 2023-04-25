@@ -1,43 +1,33 @@
-export default function validateCNPJ(value = '') {
-  // https://gist.github.com/alexbruno/6623b5afa847f891de9cb6f704d86d02
+export default function validateCNPJ(value: string) {
   if (!value) return false
 
-  // Aceita receber o valor como string, número ou array com todos os dígitos
-  const isString = typeof value === 'string'
-  const validTypes = isString || Number.isInteger(value) || Array.isArray(value)
+  if (!isValidFormat(value)) return false
 
-  // Elimina valor em formato inválido
-  if (!validTypes) return false
+  const numbers = extractNumbers(value)
 
-  // Filtro inicial para entradas do tipo string
-  if (isString) {
-    // Limita ao máximo de 18 caracteres, para CNPJ formatado
-    if (value.length > 18) return false
+  if (numbers.length !== 14 || hasRepeatedDigits(numbers) || !isValidCheckDigits(numbers)) return false
 
-    // Teste Regex para veificar se é uma string apenas dígitos válida
-    const digitsOnly = /^\d{14}$/.test(value)
-    // Teste Regex para verificar se é uma string formatada válida
-    const validFormat = /^\d{2}.\d{3}.\d{3}\/\d{4}-\d{2}$/.test(value)
+  return true
+}
 
-    // Se o formato é válido, usa um truque para seguir o fluxo da validação
-    if (digitsOnly || validFormat) true
-    // Se não, retorna inválido
-    else return false
-  }
+function isValidFormat(value: string): boolean {
+  const digitsOnly = /^\d{14}$/.test(value)
+  const validFormat = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(value)
 
-  // Guarda um array com todos os dígitos do valor
-  const match = value.toString().match(/\d/g)
-  const numbers = Array.isArray(match) ? match.map(Number) : []
+  return digitsOnly || validFormat
+}
 
-  // Valida a quantidade de dígitos
-  if (numbers.length !== 14) return false
-  
-  // Elimina inválidos com todos os dígitos iguais
-  const items = [...new Set(numbers)]
-  if (items.length === 1) return false
+function extractNumbers(value: string): number[] {
+  const match = value.match(/\d/g)
+  return Array.isArray(match) ? match.map(Number) : []
+}
 
-  // Cálculo validador
-  const calc = (x:number) => {
+function hasRepeatedDigits(numbers: number[]): boolean {
+  return new Set(numbers).size === 1
+}
+
+function isValidCheckDigits(numbers: number[]): boolean {
+  const calc = (x: number) => {
     const slice = numbers.slice(0, x)
     let factor = x - 7
     let sum = 0
@@ -49,29 +39,40 @@ export default function validateCNPJ(value = '') {
     }
 
     const result = 11 - (sum % 11)
-
     return result > 9 ? 0 : result
   }
 
-  // Separa os 2 últimos dígitos de verificadores
   const digits = numbers.slice(12)
-  
-  // Valida 1o. dígito verificador
-  const digit0 = calc(12)
-  if (digit0 !== digits[0]) return false
-
-  // Valida 2o. dígito verificador
-  const digit1 = calc(13)
-  return digit1 === digits[1]
+  return calc(12) === digits[0] && calc(13) === digits[1]
 }
 
+// Vitest test suite
 if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest
-  it('validateCNPJ', () => {
-    expect(validateCNPJ('02.108.487/0001-56')).toBeTruthy()
-    expect(validateCNPJ('02108487000156')).toBeTruthy()
-    expect(validateCNPJ('02108487000151')).toBeFalsy()
-    expect(validateCNPJ('0210848700015')).toBeFalsy()
-    expect(validateCNPJ('021084870001563')).toBeFalsy()
-  })
+  const { describe, it, expect } = import.meta.vitest
+
+  describe('flattenObject', () => {
+    it('should validate the CNPJ', () => {
+      expect(validateCNPJ('02.108.487/0001-56')).toBeTruthy()
+      expect(validateCNPJ('02108487000156')).toBeTruthy()
+      expect(validateCNPJ('02108487000151')).toBeFalsy()
+      expect(validateCNPJ('0210848700015')).toBeFalsy()
+      expect(validateCNPJ('021084870001563')).toBeFalsy()
+    })
+  
+    it('should return false if value is empty', () => {
+      expect(validateCNPJ('')).toBeFalsy()
+    })
+
+    it('should return false for non-numeric and invalid formatted CNPJ', () => {
+      expect(validateCNPJ('abcdefghijklop')).toBeFalsy()
+    })
+    
+    it('should return false when the sum is greater than 9', () => {
+      expect(validateCNPJ('00.000.000/0001-00')).toBeFalsy()
+    })
+    
+    it('should return false when the calculated check digits are greater than 9', () => {
+      expect(validateCNPJ('11.111.111/0001-37')).toBeFalsy()
+    })
+  })  
 }
