@@ -1,9 +1,15 @@
 import compareArraysOfObjectsWithId from "~/helpers/compareArraysOfObjectsWithId"
+import flattenObject from "~/helpers/flattenObject"
+import unflattenObject from "~/helpers/unflattenObject"
 
 export {
-  compareArraysOfObjectsWithId
+  compareArraysOfObjectsWithId,
+  flattenObject,
+  unflattenObject
 }
 
 export default {
-  compareArraysOfObjectsWithId
+  compareArraysOfObjectsWithId,
+  flattenObject,
+  unflattenObject
 }
