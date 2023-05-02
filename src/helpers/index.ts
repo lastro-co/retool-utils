@@ -4,6 +4,7 @@ import unflattenObject from "~/helpers/unflattenObject"
 import convertJSONToCSV from "~/helpers/convertJSONToCSV"
 import groupCycles from "~/helpers/groupCycles"
 import mergeById from "~/helpers/mergeById"
+import ungroupCycles from "~/helpers/ungroupCycles"
 
 
 export {
@@ -12,7 +13,8 @@ export {
   unflattenObject,
   convertJSONToCSV,
   groupCycles,
-  mergeById
+  mergeById,
+  ungroupCycles
 }
 
 export default {
@@ -21,5 +23,6 @@ export default {
   unflattenObject,
   convertJSONToCSV,
   groupCycles,
-  mergeById
+  mergeById,
+  ungroupCycles
 }
