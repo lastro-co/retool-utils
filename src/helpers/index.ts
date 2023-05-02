@@ -3,13 +3,16 @@ import flattenObject from "~/helpers/flattenObject"
 import unflattenObject from "~/helpers/unflattenObject"
 import convertJSONToCSV from "~/helpers/convertJSONToCSV"
 import groupCycles from "~/helpers/groupCycles"
+import mergeById from "~/helpers/mergeById"
+
 
 export {
   compareArraysOfObjectsWithId,
   flattenObject,
   unflattenObject,
   convertJSONToCSV,
-  groupCycles
+  groupCycles,
+  mergeById
 }
 
 export default {
@@ -17,5 +20,6 @@ export default {
   flattenObject,
   unflattenObject,
   convertJSONToCSV,
-  groupCycles
+  groupCycles,
+  mergeById
 }
