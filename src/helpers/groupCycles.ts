@@ -1,7 +1,7 @@
 type TableEntry = {
-  initialMonth: number;
-  finalMonth: number;
-  amount: number;
+  initialMonth: number | string;
+  finalMonth: number | string;
+  amount: number | string;
   type: string;
   description?: string;
   adjustment?: number;
@@ -21,43 +21,43 @@ type Cycle = {
 };
 
 function groupCycles(tableData: TableEntry[]): Cycle[] {
-  const sortedTableData = tableData.sort((a, b) => a.initialMonth - b.initialMonth)
+  const sortedTableData = tableData.sort((a, b) => Number(a.initialMonth) - Number(b.initialMonth))
 
   const cycles = sortedTableData.reduce<Cycle[]>((acc, entry) => {
     const existingCycleIndex = acc.findIndex(
-      cycle => cycle.initialMonth <= entry.initialMonth && cycle.finalMonth >= entry.finalMonth
+      cycle => cycle.initialMonth <= Number(entry.initialMonth) && cycle.finalMonth >= Number(entry.finalMonth)
     )
 
     const entryData = {
-      amount: entry.amount,
+      amount: Number(entry.amount),
       type: entry.type,
       description: entry.description || "",
       adjustment: entry.adjustment || 0,
-      adjustable: entry.hasOwnProperty("adjustable") ? entry.adjustable : false,
+      adjustable: entry.adjustable || false,
     }
 
     if (existingCycleIndex >= 0) {
       const existingCycle = acc[existingCycleIndex]
 
-      if (existingCycle.initialMonth < entry.initialMonth) {
+      if (existingCycle.initialMonth < Number(entry.initialMonth)) {
         acc.splice(existingCycleIndex, 1, {
           initialMonth: existingCycle.initialMonth,
-          finalMonth: entry.initialMonth - 1,
+          finalMonth: Number(entry.initialMonth) - 1,
           baseAmounts: existingCycle.baseAmounts,
         })
 
         acc.splice(existingCycleIndex + 1, 0, {
-          initialMonth: entry.initialMonth,
-          finalMonth: entry.finalMonth,
+          initialMonth: Number(entry.initialMonth),
+          finalMonth: Number(entry.finalMonth),
           baseAmounts: [
             ...existingCycle.baseAmounts,
             entryData,
           ],
         })
 
-        if (existingCycle.finalMonth > entry.finalMonth) {
+        if (existingCycle.finalMonth > Number(entry.finalMonth)) {
           acc.splice(existingCycleIndex + 2, 0, {
-            initialMonth: entry.finalMonth + 1,
+            initialMonth: Number(entry.finalMonth) + 1,
             finalMonth: existingCycle.finalMonth,
             baseAmounts: existingCycle.baseAmounts,
           })
@@ -67,8 +67,8 @@ function groupCycles(tableData: TableEntry[]): Cycle[] {
       }
     } else {
       acc.push({
-        initialMonth: entry.initialMonth,
-        finalMonth: entry.finalMonth,
+        initialMonth: Number(entry.initialMonth),
+        finalMonth: Number(entry.finalMonth),
         baseAmounts: [entryData],
       })
     }
@@ -81,218 +81,101 @@ function groupCycles(tableData: TableEntry[]): Cycle[] {
 
 export default groupCycles
 
-
 if (import.meta.vitest) {
   const { it, expect, describe } = import.meta.vitest
 
-  describe('groupCycles', () => {
-    it('should group base amounts with the same initialMonth and finalMonth into the same cycle', () => {
-      const tableData = [
-        {
-          initialMonth: 1,
-          finalMonth: 12,
-          amount: 1000,
-          type: "rent",
-        },
-        {
-          initialMonth: 1,
-          finalMonth: 12,
-          amount: -500,
-          type: "rent-discount",
-        },
-      ]
+  const createEntry = (
+    initialMonth: number | string,
+    finalMonth: number | string,
+    amount: number | string,
+    type: string
+  ) => ({
+    initialMonth,
+    finalMonth,
+    amount,
+    type,
+  })
 
-      const result = groupCycles(tableData)
-      expect(result).toEqual([
-        {
-          initialMonth: 1,
-          finalMonth: 12,
-          baseAmounts: [
-            {
-              amount: 1000,
-              type: "rent",
-              description: "",
-              adjustment: 0,
-              adjustable: false,
-            },
-            {
-              amount: -500,
-              type: "rent-discount",
-              description: "",
-              adjustment: 0,
-              adjustable: false,
-            },
-          ],
-        },
-      ])
-    })
+  const createCycle = (
+    initialMonth: number,
+    finalMonth: number,
+    baseAmounts: Array<{
+      amount: number;
+      type: string;
+    }>
+  ) => ({
+    initialMonth,
+    finalMonth,
+    baseAmounts: baseAmounts.map(b => ({
+      amount: b.amount,
+      type: b.type,
+      description: "",
+      adjustment: 0,
+      adjustable: false,
+    })),
+  })
 
-    it('should create separate cycles for base amounts with overlapping months', () => {
-      const tableData = [
-        {
-          initialMonth: 1,
-          finalMonth: 12,
-          amount: 1000,
-          type: "rent",
-        },
-        {
-          initialMonth: 10,
-          finalMonth: 12,
-          amount: -500,
-          type: "rent-discount",
-        },
-      ]
-
-      const result = groupCycles(tableData)
-      expect(result).toEqual([
-        {
-          initialMonth: 1,
-          finalMonth: 9,
-          baseAmounts: [
-            {
-              amount: 1000,
-              type: "rent",
-              description: "",
-              adjustment: 0,
-              adjustable: false,
-            },
-          ],
-        },
-        {
-          initialMonth: 10,
-          finalMonth: 12,
-          baseAmounts: [
-            {
-              amount: 1000,
-              type: "rent",
-              description: "",
-              adjustment: 0,
-              adjustable: false,
-            },
-            {
-              amount: -500,
-              type: "rent-discount",
-              description: "",
-              adjustment: 0,
-              adjustable: false,
-            },
-          ],
-        },
-      ])
-    })
-
-    it('should not group base amounts with non-overlapping months into the same cycle', () => {
-      const tableData = [
-        {
-          initialMonth: 1,
-          finalMonth: 12,
-          amount: 1000,
-          type: "rent",
-        },
-        {
-          initialMonth: 13,
-          finalMonth: 24,
-          amount: -500,
-          type: "rent-discount",
-        },
-      ]
-
-      const result = groupCycles(tableData)
-      expect(result).toEqual([
-        {
-          initialMonth: 1,
-          finalMonth: 12,
-          baseAmounts: [
-            {
-              amount: 1000,
-              type: "rent",
-              description: "",
-              adjustment: 0,
-              adjustable: false,
-            },
-          ],
-        },
-        {
-          initialMonth: 13,
-          finalMonth: 24,
-          baseAmounts: [
-            {
-              amount: -500,
-              type: "rent-discount",
-              description: "",
-              adjustment: 0,
-              adjustable: false,
-            },
-          ],
-        },
-      ])
-    })
-
-    it('should split existingCycle when entry.finalMonth is less than existingCycle.finalMonth and entry.initialMonth is greater than existingCycle.initialMonth', () => {
-      const tableData = [
-        {
-          initialMonth: 1,
-          finalMonth: 12,
-          amount: 1000,
-          type: "rent",
-        },
-        {
-          initialMonth: 2,
-          finalMonth: 6,
-          amount: -500,
-          type: "rent-discount",
-        },
-      ]
-    
-      const result = groupCycles(tableData)
-      expect(result).toEqual([
-        {
-          initialMonth: 1,
-          finalMonth: 1,
-          baseAmounts: [
-            {
-              amount: 1000,
-              type: "rent",
-              description: "",
-              adjustment: 0,
-              adjustable: false,
-            },
-          ],
-        },
-        {
-          initialMonth: 2,
-          finalMonth: 6,
-          baseAmounts: [
-            {
-              amount: 1000,
-              type: "rent",
-              description: "",
-              adjustment: 0,
-              adjustable: false,
-            },
-            {
-              amount: -500,
-              type: "rent-discount",
-              description: "",
-              adjustment: 0,
-              adjustable: false,
-            },
-          ],
-        },
-        {
-          initialMonth: 7,
-          finalMonth: 12,
-          baseAmounts: [
-            {
-              amount: 1000,
-              type: "rent",
-              description: "",
-              adjustment: 0,
-              adjustable: false,
-            },
-          ],
-        },
-      ])
+  describe("groupCycles", () => {
+    it.each([
+      {
+        testName:
+          "should group base amounts with the same initialMonth and finalMonth into the same cycle",
+        tableData: [
+          createEntry(1, 12, 1000, "rent"),
+          createEntry(1, 12, -500, "rent-discount"),
+        ],
+        expectedResult: [
+          createCycle(1, 12, [
+            { amount: 1000, type: "rent" },
+            { amount: -500, type: "rent-discount" },
+          ]),
+        ],
+      },
+      {
+        testName:
+          "should create separate cycles for base amounts with overlapping months",
+        tableData: [
+          createEntry(1, 12, 1000, "rent"),
+          createEntry(10, 12, -500, "rent-discount"),
+        ],
+        expectedResult: [
+          createCycle(1, 9, [{ amount: 1000, type: "rent" }]),
+          createCycle(10, 12, [
+            { amount: 1000, type: "rent" },
+            { amount: -500, type: "rent-discount" },
+          ]),
+        ],
+      },
+      {
+        testName:
+          "should not group base amounts with non-overlapping months into the same cycle",
+        tableData: [
+          createEntry(1, 12, 1000, "rent"),
+          createEntry(13, 24, -500, "rent-discount"),
+        ],
+        expectedResult: [
+          createCycle(1, 12, [{ amount: 1000, type: "rent" }]),
+          createCycle(13, 24, [{ amount: -500, type: "rent-discount" }]),
+        ],
+      },
+      {
+        testName:
+          "should split existingCycle when entry.finalMonth is less than existingCycle.finalMonth and entry.initialMonth is greater than existingCycle.initialMonth",
+        tableData: [
+          createEntry(1, 12, 1000, "rent"),
+          createEntry(2, 6, -500, "rent-discount"),
+        ],
+        expectedResult: [
+          createCycle(1, 1, [{ amount: 1000, type: "rent" }]),
+          createCycle(2, 6, [
+            { amount: 1000, type: "rent" },
+            { amount: -500, type: "rent-discount" },
+          ]),
+          createCycle(7, 12, [{ amount: 1000, type: "rent" }]),
+        ],
+      },
+    ])("$testName", ({ tableData, expectedResult }) => {
+      expect(groupCycles(tableData)).toEqual(expectedResult)
     })
   })
 }
