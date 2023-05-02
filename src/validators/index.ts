@@ -24,10 +24,15 @@ export default {
 
 if (import.meta.vitest) {
   const { it, expect } = import.meta.vitest
-  it('validateCPF', () => {
-    expect(validateInputVatNumberCustomRule('493.853.650-10')).toBe('')
-    expect(validateInputVatNumberCustomRule('02.108.487/0001-56')).toBe('')
-    expect(validateInputVatNumberCustomRule('')).toBe('')
-    expect(validateInputVatNumberCustomRule('49385365013')).toBe('CPF/CNPJ inválido')
+
+  const createTestParams = (value: string, expected: string) => ({ value, expected })
+
+  it.each([
+    createTestParams("493.853.650-10", ""),
+    createTestParams("02.108.487/0001-56", ""),
+    createTestParams("", ""),
+    createTestParams("49385365013", "CPF/CNPJ inválido"),
+  ])("validateInputVatNumberCustomRule($value) => $expected", ({ value, expected }) => {
+    expect(validateInputVatNumberCustomRule(value)).toBe(expected)
   })
 }

@@ -1,13 +1,18 @@
 export default function validateCNPJ(value: string) {
-  if (!value) return false
+  switch (true) {
+    case !value:
+    case !isValidFormat(value):
+      return false
 
-  if (!isValidFormat(value)) return false
+    default:
+      const numbers = extractNumbers(value)
 
-  const numbers = extractNumbers(value)
-
-  if (numbers.length !== 14 || hasRepeatedDigits(numbers) || !isValidCheckDigits(numbers)) return false
-
-  return true
+      return (
+        numbers.length === 14 &&
+        !hasRepeatedDigits(numbers) &&
+        isValidCheckDigits(numbers)
+      )
+  }
 }
 
 function isValidFormat(value: string): boolean {
@@ -46,33 +51,52 @@ function isValidCheckDigits(numbers: number[]): boolean {
   return calc(12) === digits[0] && calc(13) === digits[1]
 }
 
+// ... (restante do código)
+
 // Vitest test suite
 if (import.meta.vitest) {
   const { describe, it, expect } = import.meta.vitest
 
-  describe('flattenObject', () => {
-    it('should validate the CNPJ', () => {
-      expect(validateCNPJ('02.108.487/0001-56')).toBeTruthy()
-      expect(validateCNPJ('02108487000156')).toBeTruthy()
-      expect(validateCNPJ('02108487000151')).toBeFalsy()
-      expect(validateCNPJ('0210848700015')).toBeFalsy()
-      expect(validateCNPJ('021084870001563')).toBeFalsy()
+  describe("validateCNPJ", () => {
+    it.each([
+      {
+        value: "02.108.487/0001-56",
+        expected: true
+      },
+      {
+        value: "02108487000156",
+        expected: true
+      },
+      {
+        value: "02108487000151",
+        expected: false
+      },
+      {
+        value: "0210848700015",
+        expected: false
+      },
+      {
+        value: "021084870001563",
+        expected: false
+      },
+      {
+        value: "",
+        expected: false
+      },
+      {
+        value: "abcdefghijklop",
+        expected: false
+      },
+      {
+        value: "00.000.000/0001-00",
+        expected: false
+      },
+      {
+        value: "11.111.111/0001-37",
+        expected: false
+      },
+    ])("validateCNPJ($value) => $expected", ({ value, expected }) => {
+      expect(validateCNPJ(value)).toBe(expected)
     })
-  
-    it('should return false if value is empty', () => {
-      expect(validateCNPJ('')).toBeFalsy()
-    })
-
-    it('should return false for non-numeric and invalid formatted CNPJ', () => {
-      expect(validateCNPJ('abcdefghijklop')).toBeFalsy()
-    })
-    
-    it('should return false when the sum is greater than 9', () => {
-      expect(validateCNPJ('00.000.000/0001-00')).toBeFalsy()
-    })
-    
-    it('should return false when the calculated check digits are greater than 9', () => {
-      expect(validateCNPJ('11.111.111/0001-37')).toBeFalsy()
-    })
-  })  
+  })
 }
