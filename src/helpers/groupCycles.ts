@@ -4,7 +4,7 @@ type TableEntry = {
   amount: number | string;
   type: string;
   description?: string;
-  adjustment?: number;
+  adjustment?: number | string;
   adjustable?: boolean;
 };
 
@@ -32,7 +32,7 @@ function groupCycles(tableData: TableEntry[]): Cycle[] {
       amount: Number(entry.amount),
       type: entry.type,
       description: entry.description || "",
-      adjustment: entry.adjustment || 0,
+      adjustment: Number(entry.adjustment) || 0,
       adjustable: entry.adjustable || false,
     }
 
