@@ -36,13 +36,11 @@ function toBoolean(value: boolean | undefined): boolean {
 }
 
 function groupCycles(tableData: TableEntry[]): Cycle[] {
-  const sortedTableData = tableData.sort((a, b) => toNumber(a.initialMonth) - toNumber(b.initialMonth))
+  const sortedTableData = tableData.sort(
+    (a, b) => toNumber(a.initialMonth) - toNumber(b.initialMonth)
+  )
 
-  const cycles = sortedTableData.reduce<Cycle[]>((acc, entry) => {
-    const existingCycleIndex = acc.findIndex(
-      cycle => (cycle.id && entry.cycleId ? cycle.id === entry.cycleId : true) && cycle.initialMonth <= toNumber(entry.initialMonth) && cycle.finalMonth >= toNumber(entry.finalMonth)
-    )
-
+  return sortedTableData.reduce<Cycle[]>((result, entry) => {
     const entryData = {
       id: entry.id ?? undefined,
       amount: toNumber(entry.amount),
@@ -52,51 +50,52 @@ function groupCycles(tableData: TableEntry[]): Cycle[] {
       adjustable: toBoolean(entry.adjustable),
     }
 
-    if (existingCycleIndex >= 0) {
-      const existingCycle = acc[existingCycleIndex]
+    const existingCycle = result.find(
+      (cycle) =>
+        cycle.id === entry.cycleId &&
+        cycle.initialMonth <= toNumber(entry.initialMonth) &&
+        cycle.finalMonth >= toNumber(entry.finalMonth)
+    )
 
-      if (existingCycle.initialMonth < toNumber(entry.initialMonth)) {
-        acc.splice(existingCycleIndex, 1, {
-          id: existingCycle.id,
-          initialMonth: existingCycle.initialMonth,
-          finalMonth: toNumber(entry.initialMonth) - 1,
-          baseAmounts: existingCycle.baseAmounts,
-        })
-
-        acc.splice(existingCycleIndex + 1, 0, {
-          id: existingCycle.id,
-          initialMonth: toNumber(entry.initialMonth),
-          finalMonth: toNumber(entry.finalMonth),
-          baseAmounts: [
-            ...existingCycle.baseAmounts,
-            entryData,
-          ],
-        })
-
-        if (existingCycle.finalMonth > toNumber(entry.finalMonth)) {
-          acc.splice(existingCycleIndex + 2, 0, {
-            id: existingCycle.id,
-            initialMonth: toNumber(entry.finalMonth) + 1,
-            finalMonth: existingCycle.finalMonth,
-            baseAmounts: existingCycle.baseAmounts,
-          })
-        }
-      } else {
-        existingCycle.baseAmounts.push(entryData)
-      }
-    } else {
-      acc.push({
+    if (!existingCycle) {
+      result.push({
         id: entry.cycleId ?? undefined,
         initialMonth: toNumber(entry.initialMonth),
         finalMonth: toNumber(entry.finalMonth),
         baseAmounts: [entryData],
       })
+      return result
     }
 
-    return acc
-  }, [])
+    const left =
+      existingCycle.initialMonth < toNumber(entry.initialMonth)
+        ? {
+            ...existingCycle,
+            finalMonth: toNumber(entry.initialMonth) - 1,
+          }
+        : undefined
 
-  return cycles
+    const right =
+      existingCycle.finalMonth > toNumber(entry.finalMonth)
+        ? {
+            ...existingCycle,
+            initialMonth: toNumber(entry.finalMonth) + 1,
+          }
+        : undefined
+
+    const updatedCurrent = {
+      ...existingCycle,
+      initialMonth: Math.max(existingCycle.initialMonth, toNumber(entry.initialMonth)),
+      finalMonth: Math.min(existingCycle.finalMonth, toNumber(entry.finalMonth)),
+      baseAmounts: [...existingCycle.baseAmounts, entryData],
+    }
+
+    const updatedCycles = [left, updatedCurrent, right].filter((c) => !!c) as Cycle[]
+    result = result.filter((cycle) => cycle !== existingCycle)
+    result.push(...updatedCycles)
+    
+    return result
+  }, [])
 }
 
 export default groupCycles
@@ -205,6 +204,26 @@ if (import.meta.vitest) {
           createCycle(7, 12, [{ amount: 1000, type: "rent" }]),
         ],
       },
+      {
+        testName:
+          "should properly handle entryData with equal initialMonth and finalMonth",
+        tableData: [
+          createEntry(1, 36, 3700, "base-rent"),
+          createEntry(1, 1, -3700, "rent-free"),
+          createEntry(2, 7, -500, "rent-discount"),
+        ],
+        expectedResult: [
+          createCycle(1, 1, [
+            { amount: 3700, type: "base-rent" },
+            { amount: -3700, type: "rent-free" },
+          ]),
+          createCycle(2, 7, [
+            { amount: 3700, type: "base-rent" },
+            { amount: -500, type: "rent-discount" },
+          ]),
+          createCycle(8, 36, [{ amount: 3700, type: "base-rent" }]),
+        ],
+      }
     ])("$testName", ({ tableData, expectedResult }) => {
       expect(groupCycles(tableData)).toEqual(expectedResult)
     })
