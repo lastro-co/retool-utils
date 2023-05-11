@@ -28,21 +28,35 @@ function toNumber(value: number | string | undefined | null): number {
   if (value === undefined || value === null) {
     return 0
   }
-  return typeof value === 'number' ? value : Number(value) || 0
+  return typeof value === "number" ? value : Number(value) || 0
 }
 
 function toBoolean(value: boolean | undefined): boolean {
   return value || false
 }
 
+function findExistingCycle(cycles: Cycle[], entry: TableEntry): Cycle | undefined {
+  return cycles.find(
+    (cycle) =>
+      cycle.id === entry.cycleId &&
+      cycle.initialMonth <= toNumber(entry.initialMonth) &&
+      cycle.finalMonth >= toNumber(entry.finalMonth),
+  )
+}
+
+function createUpdatedCycle(cycle: Cycle, left: Cycle | undefined, right: Cycle| undefined): Cycle[] {
+  return [left, cycle, right].filter((c) => !!c) as Cycle[]
+}
+
 function groupCycles(tableData: TableEntry[]): Cycle[] {
   const sortedTableData = tableData.sort(
-    (a, b) => toNumber(a.initialMonth) - toNumber(b.initialMonth)
+    (a, b) => toNumber(a.initialMonth) - toNumber(b.initialMonth) ||
+      toNumber(b.finalMonth) - toNumber(a.finalMonth),
   )
 
-  return sortedTableData.reduce<Cycle[]>((result, entry) => {
+  return sortedTableData.reduce<Cycle[]>((accumulator, entry) => {
     const entryData = {
-      id: entry.id ?? undefined,
+      ...(entry.id && { id: entry.id }),
       amount: toNumber(entry.amount),
       type: entry.type,
       description: entry.description || "",
@@ -50,21 +64,15 @@ function groupCycles(tableData: TableEntry[]): Cycle[] {
       adjustable: toBoolean(entry.adjustable),
     }
 
-    const existingCycle = result.find(
-      (cycle) =>
-        cycle.id === entry.cycleId &&
-        cycle.initialMonth <= toNumber(entry.initialMonth) &&
-        cycle.finalMonth >= toNumber(entry.finalMonth)
-    )
-
+    const existingCycle = findExistingCycle(accumulator, entry)
     if (!existingCycle) {
-      result.push({
-        id: entry.cycleId ?? undefined,
+      accumulator.push({
+        ...(entry.cycleId && { id: entry.cycleId }),
         initialMonth: toNumber(entry.initialMonth),
         finalMonth: toNumber(entry.finalMonth),
         baseAmounts: [entryData],
       })
-      return result
+      return accumulator
     }
 
     const left =
@@ -90,11 +98,11 @@ function groupCycles(tableData: TableEntry[]): Cycle[] {
       baseAmounts: [...existingCycle.baseAmounts, entryData],
     }
 
-    const updatedCycles = [left, updatedCurrent, right].filter((c) => !!c) as Cycle[]
-    result = result.filter((cycle) => cycle !== existingCycle)
-    result.push(...updatedCycles)
+    const updatedCycles = createUpdatedCycle(updatedCurrent, left, right)
+    accumulator = accumulator.filter((cycle) => cycle !== existingCycle)
+    accumulator.push(...updatedCycles)
     
-    return result
+    return accumulator
   }, [])
 }
 
@@ -222,6 +230,39 @@ if (import.meta.vitest) {
             { amount: -500, type: "rent-discount" },
           ]),
           createCycle(8, 36, [{ amount: 3700, type: "base-rent" }]),
+        ],
+      },
+      {
+        testName:
+          "should properly handle entryData with equal initialMonth and finalMonth (different order)",
+        tableData: [
+          createEntry(1, 1, -3700, "rent-free"),
+          createEntry(1, 36, 3700, "base-rent"),
+          createEntry(2, 7, -500, "rent-discount"),
+        ],
+        expectedResult: [
+          createCycle(1, 1, [
+            { amount: 3700, type: "base-rent" },
+            { amount: -3700, type: "rent-free" },
+          ]),
+          createCycle(2, 7, [
+            { amount: 3700, type: "base-rent" },
+            { amount: -500, type: "rent-discount" },
+          ]),
+          createCycle(8, 36, [{ amount: 3700, type: "base-rent" }]),
+        ],
+      },
+      {
+        testName: "should return id and cycleId properties when they are provided",
+        tableData: [
+          createEntry(1, 12, 1000, "rent", "base-amount-1", "cycle-1"),
+          createEntry(1, 12, -500, "rent-discount", "base-amount-2", "cycle-1"),
+        ],
+        expectedResult: [
+          createCycle(1, 12, [
+            { id: "base-amount-1", amount: 1000, type: "rent" },
+            { id: "base-amount-2", amount: -500, type: "rent-discount" },
+          ], "cycle-1"),
         ],
       }
     ])("$testName", ({ tableData, expectedResult }) => {
