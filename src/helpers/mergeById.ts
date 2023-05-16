@@ -7,7 +7,7 @@ function mergeById(existingArray: Item[], newArray: Item[]): Item[] {
   const combinedArray: Item[] = [...existingArray]
 
   newArray.forEach((newItem: Item) => {
-    if (!newItem.id){
+    if (!newItem.id) {
       combinedArray.push(newItem)
       return
     }
@@ -15,7 +15,7 @@ function mergeById(existingArray: Item[], newArray: Item[]): Item[] {
       (existingItem: Item) => existingItem.id === newItem.id
     )
     if (index !== -1) {
-      combinedArray[index] = newItem
+      combinedArray[index] = { ...combinedArray[index], ...newItem }
     } else {
       combinedArray.push(newItem)
     }
@@ -71,6 +71,68 @@ if (import.meta.vitest) {
         { id: "1", value: "a" },
         { id: "2", value: "c" },
         { id: "3", value: "d" },
+      ])
+    })
+
+    it("should handle a combination of cases", () => {
+      const existingArray: Item[] = [
+        {
+          adjustable: true,
+          adjustment: "0",
+          amount: "1100",
+          cycleId: "ea4312e4-7eb1-4eb0-83d9-4eebe6fa066b",
+          description: "",
+          finalMonth: 12,
+          id: "3ba3895c-490b-447c-9015-c1bd819fe381",
+          initialMonth: 1,
+          type: "base-rent"
+        },
+        {
+          adjustable: true,
+          adjustment: "0",
+          amount: "-100",
+          cycleId: "ea4312e4-7eb1-4eb0-83d9-4eebe6fa066b",
+          description: "",
+          finalMonth: 12,
+          id: "1fb852a6-1ddf-47d2-9544-af6eb59a5d95",
+          initialMonth: 1,
+          type: "rent-discount"
+        },
+      ]
+      const newArray: Item[] = [
+        {
+          adjustable: true,
+          adjustment: "0",
+          amount: "-110",
+          description: "",
+          id: "1fb852a6-1ddf-47d2-9544-af6eb59a5d95",
+          type: "rent-discount"
+        },
+      ]
+      const result = mergeById(existingArray, newArray)
+      expect(result).toEqual([
+        {
+          adjustable: true,
+          adjustment: "0",
+          amount: "1100",
+          cycleId: "ea4312e4-7eb1-4eb0-83d9-4eebe6fa066b",
+          description: "",
+          finalMonth: 12,
+          id: "3ba3895c-490b-447c-9015-c1bd819fe381",
+          initialMonth: 1,
+          type: "base-rent"
+        },
+        {
+          adjustable: true,
+          adjustment: "0",
+          amount: "-110",
+          cycleId: "ea4312e4-7eb1-4eb0-83d9-4eebe6fa066b",
+          description: "",
+          finalMonth: 12,
+          id: "1fb852a6-1ddf-47d2-9544-af6eb59a5d95",
+          initialMonth: 1,
+          type: "rent-discount"
+        },
       ])
     })
   })
